@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Level Monitor</title>
+    <style>
+        #waterProgressBar {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        #waterLevel {
+            height: 100%;
+            background-color: #4CAF50;
+        }
+
+        #waterPercentage {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="waterProgressBar">
+        <div id="waterLevel"></div>
+    </div>
+    <div id="waterPercentage">Water Level: <span id="percentageValue">0%</span></div>
+
+    <script>
+        function updateWaterLevel() {
+            var url = "ws://192.168.43.244:81";
+            var websocket = new WebSocket(url);
+
+            websocket.onmessage = function(evt) {
+                var waterLevel = parseInt(evt.data);
+                var percentage = (waterLevel / 8) * 100;
+                document.getElementById('waterLevel').style.width = percentage + '%';
+                document.getElementById('percentageValue').innerText = percentage + '%';
+            };
+
+            websocket.onopen = function(evt) {
+                // Send a request to the server to get the initial water level
+                websocket.send("getWaterLevel");
+            };
+        }
+
+        // Update water level initially
+        updateWaterLevel();
+
+        // Update water level every 2 seconds
+        setInterval(updateWaterLevel, 500);
+    </script>
+</body>
+</html>
